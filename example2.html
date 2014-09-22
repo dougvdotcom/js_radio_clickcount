@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<!--
+		How To Increment A Counter In MySQL Based On A Radio Button Click 
+		Copyright (C) 2012 Doug Vanderweide
+
+		This program is free software: you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation, either version 3 of the License, or
+		(at your option) any later version.
+
+		This program is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+		GNU General Public License for more details.
+
+		You should have received a copy of the GNU General Public License
+		along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	-->
+	<head>
+		<title>
+			How To Increment A Counter In MySQL Based On A Radio Button Click Example 2: Using jQuery and AJAX
+		</title>
+		<link rel="stylesheet" type="text/css" href="../demo.css" />
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script type="text/javascript">
+			var lastClicked = '';
+			
+			function getTotals() {
+				// function to get click counts as JSON from helper page
+				// expects get_count.php to be in same directory level
+				
+				$.ajax({
+					type: "GET",
+					url: "get_count.php",
+					dataType: "json",
+					error: function(xhr, status, msg) {
+						alert("Failed to get click counts: " + msg);
+					}
+				})
+				.done(function(data) {
+					// loop through JSON variables, assign to count labels
+					$.each(data, function(key, value) {
+						var tmp = "#c_" + key;
+						$(tmp).text(value);
+					});
+				});
+			}
+		
+			function processClick(obj) {
+				// function to increment click count via ajax
+				// expects increment_count.php to be in same directory level
+
+				if(lastClicked != obj.val()) { // don't count clicks on currently active radio button
+					lastClicked = obj.val(); // set currently clicked radio button to this one
+					
+					var qs = "color=" + obj.val(); // set query string value
+					
+					$.ajax({
+						type: "GET",
+						url: "increment_count.php",
+						data: qs,
+						error: function(xhr, status, msg) {
+							alert("Failed to process click count: " + msg);
+						}
+					})
+					.done(function() {
+						getTotals(); // update totals on successful processing
+					});
+				}
+			}
+			
+			$(document).ready(function() {
+				getTotals(); // get click totals on initial page load
+				
+				$(document).ready(function() {
+					// add click incrementing event handler to all radio buttons on page
+					$('input:radio').click(function() {
+						processClick($(this));
+					});
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<h2>
+			How To Increment A Counter In MySQL Based On A Radio Button Click<br />
+			Example 2: Using jQuery and AJAX
+		</h2>
+		
+		<p class="notice">Selecting a radio button below will cause the form to post and increment the count for the respective color choice.</p>
+		
+		<form id="myform" name="myform" method="post">
+			<p>Select a color:</p>
+			<label id="l_red"><input type="radio" id="r_red" name="color_name" value="red" />Red</label> (<label id="c_red">0</label>) | 
+			<label id="l_green"><input type="radio" id="r_green" name="color_name" value="green" />Green</label> (<label id="c_green">0</label>) | 
+			<label id="l_blue"><input type="radio" id="r_blue" name="color_name" value="blue" />Blue</label> (<label id="c_blue">0</label>) | 
+			<label id="l_black"><input type="radio" id="r_black" name="color_name" value="black" />Black</label> (<label id="c_black">0</label>)
+		</form>
+		
+		<p>
+			<a href="index.php">How To Increment A Counter In MySQL Based On A Radio Button Click Example 1: Post Back To Same PHP Page</a>
+		</p>
+		<p>
+			<a href="https://www.dougv.com/2012/04/06/how-to-increment-a-counter-in-mysql-based-on-a-radio-button-click">How To Increment A Counter In MySQL Based On A Radio Button Click</a>
+		</p>
+	</body>
+</html>
